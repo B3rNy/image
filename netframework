@@ -1,25 +1,17 @@
-# Configuración de parámetros para Winget
-$winget = "winget"
-$args = "--accept-package-agreements --accept-source-agreements --silent --force"
 
-Write-Host "Iniciando instalación de dependencias y software de Lenovo..."
+$VersionsToRemove = @("100.0.1185.36", "147.0.3912.72")
 
-# 1. Instalar Microsoft Visual C++ Redistributable (2015-2022)
-# Este es el paquete 'paraguas' que incluye todas las versiones modernas necesarias.
-Write-Host "Instalando Microsoft Visual C++ Redistributable..."
-Start-Process -FilePath $winget -ArgumentList "install --id Microsoft.VCRedist.2015+.x64 $args" -Wait
-
-# 2. Instalar Microsoft Windows Desktop Runtime (6.0 o 8.0 son los estándares actuales)
-# Muchos plugins modernos de Lenovo ya saltaron a .NET 6 o superior.
-Write-Host "Instalando .NET Desktop Runtime..."
-Start-Process -FilePath $winget -ArgumentList "install --id Microsoft.DotNet.DesktopRuntime.8 $args" -Wait
-
-# 3. Instalar Lenovo System Interface Foundation (LSIF)
-Write-Host "Instalando Lenovo System Interface Foundation..."
-Start-Process -FilePath $winget -ArgumentList "install --id Lenovo.SystemInterfaceFoundation $args" -Wait
-
-# 4. Instalar Lenovo Commercial Vantage (desde MS Store)
-Write-Host "Instalando Lenovo Commercial Vantage..."
-Start-Process -FilePath $winget -ArgumentList "install --id 9NRZZ6H9DMPS --source msstore $args" -Wait
-
-Write-Host "Proceso finalizado correctamente."
+foreach ($Version in $VersionsToRemove) {
+    $UninstallPath = "C:\Program Files (x86)\Microsoft\EdgeWebView\Application\$Version\Installer\setup.exe"
+    
+    if (Test-Path $UninstallPath) {
+        Write-Host "Eliminando versión $Version..." -ForegroundColor Cyan
+        Start-Process -FilePath $UninstallPath -ArgumentList "--uninstall --msedgewebview --system-level --force-uninstall" -Wait
+    } else {
+        Write-Host "No se encontró el desinstalador para la versión $Version. Procediendo a borrado manual de carpeta..." -ForegroundColor Yellow
+        $FolderPath = "C:\Program Files (x86)\Microsoft\EdgeWebView\Application\$Version"
+        if (Test-Path $FolderPath) {
+            Remove-Item -Path $FolderPath -Recurse -Force
+        }
+    }
+}
