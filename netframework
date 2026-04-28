@@ -1,4 +1,4 @@
-
+# ELIMINAR WEBVIEW2
 $VersionsToRemove = @("100.0.1185.36", "147.0.3912.72")
 
 foreach ($Version in $VersionsToRemove) {
